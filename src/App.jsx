@@ -1,11 +1,12 @@
-import { BranchesAndTracksProvider } from "./contexts/BranchesAndTracksContext";
-import MultiStepForm from "./pages/MultiStepForm";
+import { ErrorModelProvider } from "./contexts/ErrorModelProvider"; // استيراد مزود السياق
+import MultiStepForm from "./pages/MultiStepForm"; // استيراد النموذج المتعدد الخطوات
+
 function App() {
   return (
     <>
-      <BranchesAndTracksProvider>
+      <ErrorModelProvider> {/* تغليف المكونات بمزود السياق */}
         <MultiStepForm />
-      </BranchesAndTracksProvider>
+      </ErrorModelProvider>
     </>
   );
 }

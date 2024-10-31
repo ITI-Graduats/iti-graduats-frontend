@@ -6,7 +6,10 @@ import {
 } from "../../services/registerFormUtils";
 import Data from "../../SelectOption.json";
 import SelectComponent from "../../components/Ui/SelectComponent";
-import { useBranchesAndTracks } from "../../contexts/BranchesAndTracksContext";
+import { useErrorModel } from "../../contexts/ErrorModelProvider"; 
+import ErrorModel from "../../components/errorModel/errorModel";
+import Loading from "../../components/Ui/Loading"; 
+
 
 const StepTeachingPreferences = ({
   formData,
@@ -15,7 +18,7 @@ const StepTeachingPreferences = ({
 
   handleSelectBlur,
 }) => {
-  const { branches } = useBranchesAndTracks();
+  const {  isLoading,branches } = useErrorModel()
 
   const optionsinterestedInTeaching = Data.interestedInTeaching?.map(
     (interestedInTeaching) => ({
@@ -31,7 +34,10 @@ const StepTeachingPreferences = ({
     label: name,
   }));
 
+    if (isLoading) return <Loading />;
+
   return (
+    <><ErrorModel />
     <div className="space-y-12">
       <h1 className="font-bold text-2xl text-center w-full text-main">
         Teaching Preferences
@@ -41,117 +47,96 @@ const StepTeachingPreferences = ({
           <SelectComponent
             options={optionBranchWantteach}
             label="Preferred Teaching Branches"
-            onChange={(selectedOption) =>
-              handleMultiSelectChange(
-                selectedOption,
-                "preferredTeachingBranches",
-                setFormData
-              )
-            }
-            onBlur={() =>
-              handleSelectBlur(
-                "preferredTeachingBranches",
-                formData.preferredTeachingBranches
-              )
-            }
-            value={
-              formData?.preferredTeachingBranches
-                ? optionBranchWantteach
-                    .filter((option) =>
-                      formData.preferredTeachingBranches.includes(option.value)
+            onChange={(selectedOption) => handleMultiSelectChange(
+              selectedOption,
+              "preferredTeachingBranches",
+              setFormData
+            )}
+            onBlur={() => handleSelectBlur(
+              "preferredTeachingBranches",
+              formData.preferredTeachingBranches
+            )}
+            value={formData?.preferredTeachingBranches
+              ? optionBranchWantteach
+                .filter((option) => formData.preferredTeachingBranches.includes(option.value)
+                )
+                .concat(
+                  formData.preferredTeachingBranches
+                    .filter(
+                      (value) => !optionBranchWantteach.some(
+                        (option) => option.value === value
+                      )
                     )
-                    .concat(
-                      formData.preferredTeachingBranches
-                        .filter(
-                          (value) =>
-                            !optionBranchWantteach.some(
-                              (option) => option.value === value
-                            )
-                        )
-                        .map((value) => ({ value, label: value }))
-                    )
-                : []
-            }
+                    .map((value) => ({ value, label: value }))
+                )
+              : []}
             name="preferredTeachingBranches"
             placeholder="Select branches you can teach in"
             required={true}
             isMulti={true}
-            errorMessage={formErrors.preferredTeachingBranches}
-          />
+            errorMessage={formErrors.preferredTeachingBranches} />
         </div>
 
         <div>
           <SelectComponent
             options={optionsinterestedInTeaching}
             label="Teaching Interest"
-            onChange={(selectedOption) =>
-              handleSelectChange(
-                selectedOption,
-                "interestedInTeaching",
-                setFormData
-              )
-            }
-            onBlur={() =>
-              handleSelectBlur(
-                "interestedInTeaching",
-                formData.interestedInTeaching
-              )
-            }
-            value={
-              optionsinterestedInTeaching?.find(
-                (option) => option.value === formData.interestedInTeaching
-              ) || null
-            }
+            onChange={(selectedOption) => handleSelectChange(
+              selectedOption,
+              "interestedInTeaching",
+              setFormData
+            )}
+            onBlur={() => handleSelectBlur(
+              "interestedInTeaching",
+              formData.interestedInTeaching
+            )}
+            value={optionsinterestedInTeaching?.find(
+              (option) => option.value === formData.interestedInTeaching
+            ) || null}
             name="interestedInTeaching"
             required
             placeholder="Select your teaching interest"
-            errorMessage={formErrors.interestedInTeaching}
-          />
+            errorMessage={formErrors.interestedInTeaching} />
         </div>
         <div className="input-with-tooltip">
           <SelectComponent
             options={optionPreferenceCourse}
             label="Preferred Teaching Courses"
-            onChange={(selectedOption) =>
-              handleMultiSelectChange(
-                selectedOption,
-                "preferredCoursesToTeach",
-                setFormData
-              )
-            }
-            onBlur={() =>
-              handleSelectBlur(
-                "preferredCoursesToTeach",
-                formData.preferredCoursesToTeach
-              )
-            }
-            value={
-              formData?.preferredCoursesToTeach
-                ? optionPreferenceCourse
-                    .filter((option) =>
-                      formData.preferredCoursesToTeach.includes(option.value)
+            onChange={(selectedOption) => handleMultiSelectChange(
+              selectedOption,
+              "preferredCoursesToTeach",
+              setFormData
+            )}
+            onBlur={() => handleSelectBlur(
+              "preferredCoursesToTeach",
+              formData.preferredCoursesToTeach
+            )}
+            value={formData?.preferredCoursesToTeach
+              ? optionPreferenceCourse
+                .filter((option) => formData.preferredCoursesToTeach.includes(option.value)
+                )
+                .concat(
+                  formData.preferredCoursesToTeach
+                    .filter(
+                      (value) => !optionPreferenceCourse.some(
+                        (option) => option.value === value
+                      )
                     )
-                    .concat(
-                      formData.preferredCoursesToTeach
-                        .filter(
-                          (value) =>
-                            !optionPreferenceCourse.some(
-                              (option) => option.value === value
-                            )
-                        )
-                        .map((value) => ({ value, label: value }))
-                    )
-                : []
-            }
+                    .map((value) => ({ value, label: value }))
+                )
+              : []}
             name="preferredCoursesToTeach"
             placeholder="Add your preferred teaching courses (e.g., JavaScript, TypeScript)"
             isMulti={true}
             isCreatable={true}
-            errorMessage={formErrors?.preferredCoursesToTeach}
-          />
+            errorMessage={formErrors?.preferredCoursesToTeach} />
+
+          <span className="tooltip">
+            Write the courses separated by press enter after every course
+          </span>
         </div>
       </div>
-    </div>
+    </div></>
   );
 };
 

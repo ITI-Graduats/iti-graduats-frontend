@@ -5,8 +5,9 @@ import {
 } from "../../services/registerFormUtils";
 import Data from "../../SelectOption.json";
 import SelectComponent from "../../components/Ui/SelectComponent";
-import { useBranchesAndTracks } from "../../contexts/BranchesAndTracksContext";
-import { useEffect } from "react";
+import { useErrorModel } from "../../contexts/ErrorModelProvider"; 
+import ErrorModel from "../../components/errorModel/errorModel";
+import Loading from "../../components/Ui/Loading"; 
 
 const StepEducationDetails = ({
   formData,
@@ -15,7 +16,7 @@ const StepEducationDetails = ({
   handleBlur,
   handleSelectBlur,
 }) => {
-  const { tracks, branches } = useBranchesAndTracks();
+const { isLoading,tracks, branches } = useErrorModel()
 
   const optionsUniversity = Data.Universities?.map((university) => ({
     value: university.value,
@@ -47,73 +48,17 @@ const StepEducationDetails = ({
     value: name,
     label: name,
   }));
-
-  const currentYear = new Date().getFullYear();
-  const graduationYearOptions = Array.from(
-    { length: currentYear - 1993 },
-    (_, index) => ({
-      value: currentYear - index,
-      label: (currentYear - index).toString(),
-    })
-  );
-
-  const initialIntakeYear = 1980;
-  const intakeCount = currentYear - initialIntakeYear;
-  const intakeYearsOptions = Array.from(
-    { length: intakeCount },
-    (_, index) => ({
-      value: intakeCount - index,
-      label: (intakeCount - index).toString(),
-    })
-  );
-
-  const PROFESSIONAL_TRAINING = "Professional Training Program - (9 Months)";
-  const INTENSIVE_CODE_CAMP = "Intensive Code Camp - (4 Months)";
-
-  const isProfessionalTraining = formData.program === PROFESSIONAL_TRAINING;
-  const isIntensiveCodeCamp = formData.program === INTENSIVE_CODE_CAMP;
-
-  const isRoundDisabled = !formData.program || isProfessionalTraining;
-  const isIntakeDisabled = !formData.program || isIntensiveCodeCamp;
-
-  // Clear conditional fields when program changes
-  useEffect(() => {
-    if (formData.program) {
-      const updatedFormData = { ...formData };
-
-      if (isProfessionalTraining) {
-        updatedFormData.round = "";
-      }
-
-      if (isIntensiveCodeCamp) {
-        updatedFormData.intake = null;
-      }
-
-      if (!formData.program) {
-        updatedFormData.round = "";
-        updatedFormData.intake = "";
-      }
-
-      setFormData(updatedFormData);
-    }
-  }, [formData.program]);
-
-  const handleProgramChange = (selectedOption) => {
-    const newProgram = selectedOption?.value;
-
-    setFormData((prev) => {
-      const updated = {
-        ...prev,
-        program: newProgram,
-        round: newProgram === PROFESSIONAL_TRAINING ? "" : prev.round,
-        intake: newProgram === INTENSIVE_CODE_CAMP ? "" : prev.intake,
-      };
-      return updated;
-    });
-  };
+  const isRoundDisabled =
+    !formData.program ||
+    formData.program === "Professional Training Program - (9 Months)";
+  const isIntakeDisabled =
+    !formData.program ||
+    formData.program === "Intensive Code Camp - (4 Months)";
+    
+    if (isLoading) return <Loading />;
 
   return (
-    <div className="space-y-6 lg:space-y-10">
+    <><ErrorModel /><div className="space-y-6 lg:space-y-0">
       <h1 className="font-bold text-2xl text-center w-full text-main">
         Education Details
       </h1>
@@ -123,9 +68,7 @@ const StepEducationDetails = ({
             <SelectComponent
               options={optionsUniversity}
               label="University"
-              onChange={(selectedOption) =>
-                handleSelectChange(selectedOption, "university", setFormData)
-              }
+              onChange={(selectedOption) => handleSelectChange(selectedOption, "university", setFormData)}
               onBlur={() => handleSelectBlur("university", formData.university)}
               value={
                 optionsUniversity.find(
@@ -133,21 +76,17 @@ const StepEducationDetails = ({
                 ) ||
                 (formData.university
                   ? { value: formData.university, label: formData.university }
-                  : null)
-              }
+                  : null)}
               name="university"
               placeholder="Select your university"
               isCreatable
               required
-              errorMessage={formErrors.university}
-            />
+              errorMessage={formErrors.university} />
 
             <SelectComponent
               options={optionsFactualy}
               label="Faculty"
-              onChange={(selectedOption) =>
-                handleSelectChange(selectedOption, "faculty", setFormData)
-              }
+              onChange={(selectedOption) => handleSelectChange(selectedOption, "faculty", setFormData)}
               onBlur={() => handleSelectBlur("faculty", formData.faculty)}
               value={
                 optionsFactualy.find(
@@ -155,14 +94,12 @@ const StepEducationDetails = ({
                 ) ||
                 (formData.faculty
                   ? { value: formData.faculty, label: formData.faculty }
-                  : null)
-              }
+                  : null)}
               name="faculty"
               placeholder="Select your faculty"
               isCreatable
               required
-              errorMessage={formErrors.faculty}
-            />
+              errorMessage={formErrors.faculty} />
           </div>
 
           <div className="xl:flex xl:space-x-4">
@@ -173,11 +110,9 @@ const StepEducationDetails = ({
                 handleSelectChange(selectedOption, "branch", setFormData)
               }
               onBlur={() => handleSelectBlur("branch", formData.branch)}
-              value={
-                optionbranch?.find(
-                  (option) => option.value === formData.branch
-                ) || null
-              }
+              value={optionbranch?.find(
+                (option) => option.value === formData.branch
+              ) || null}
               name="branch"
               placeholder="Select your ITI branch"
               required
@@ -218,16 +153,13 @@ const StepEducationDetails = ({
               label="Program"
               onChange={handleProgramChange}
               onBlur={() => handleSelectBlur("program", formData.program)}
-              value={
-                optionsProgram?.find(
-                  (option) => option.value === formData.program
-                ) || null
-              }
+              value={optionsProgram?.find(
+                (option) => option.value === formData.program
+              ) || null}
               name="program"
               placeholder="Select your program"
               required
-              errorMessage={formErrors.program}
-            />
+              errorMessage={formErrors.program} />
           </div>
 
           <div className="flex space-x-4">
@@ -274,24 +206,19 @@ const StepEducationDetails = ({
             <SelectComponent
               options={optionTrack}
               label="Track"
-              onChange={(selectedOption) =>
-                handleSelectChange(selectedOption, "trackName", setFormData)
-              }
+              onChange={(selectedOption) => handleSelectChange(selectedOption, "trackName", setFormData)}
               onBlur={() => handleSelectBlur("trackName", formData.trackName)}
-              value={
-                optionTrack?.find(
-                  (option) => option.value === formData.trackName
-                ) || null
-              }
+              value={optionTrack?.find(
+                (option) => option.value === formData.trackName
+              ) || null}
               name="trackName"
               placeholder="Select your track"
               required
-              errorMessage={formErrors.trackName}
-            />
+              errorMessage={formErrors.trackName} />
           </div>
         </div>
       </div>
-    </div>
+    </div></>
   );
 };
 
